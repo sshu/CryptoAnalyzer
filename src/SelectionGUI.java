@@ -49,6 +49,23 @@ public class SelectionGUI extends JFrame{
 	private JTextArea rsaCiphertextBox;
 	private JTextArea rsaResults;
 	
+	//ECC Global Data
+	private JRadioButton ecc160;
+	private JRadioButton ecc224;
+	private JRadioButton ecc256;
+	private JTextArea eccPublicKeyBox;
+	private JTextArea eccPlaintextBox;
+	private JTextArea eccCiphertextBox;
+	private JTextArea eccResults;
+	
+	//Algorithm Objects
+	private AESCBC aescbc;
+	private AESECB aesecb;
+	private DESCBC descbc;
+	private DESECB desecb;
+	private RSA rsa;
+	private ECC ecc;
+	
 	public SelectionGUI()
 	{		
 		// Set the title bar text.
@@ -66,6 +83,9 @@ public class SelectionGUI extends JFrame{
 	      buildAESTab();
 	      buildDESTab();
 	      buildRSATab();
+	      buildECCTab();
+	      
+	      initInstatiation();
 
 	      // Display the window.
 	      setVisible(true);
@@ -336,6 +356,99 @@ public class SelectionGUI extends JFrame{
 		mainTabbedPane.addTab("RSA", rsaTab);
 	}
 	
+	public void buildECCTab()
+	{		
+		JPanel eccTab = new JPanel();
+		eccTab.setLayout(new BorderLayout());
+		
+		JPanel eccSettings = new JPanel();//Create Panel with ECC settings
+		eccSettings.setLayout(new BoxLayout(eccSettings, BoxLayout.Y_AXIS));//Line up items in a single column
+		
+	    JPanel eccPrint = new JPanel();//Create Panel to print results
+	    
+	    eccTab.add(eccSettings, BorderLayout.LINE_START);
+	    eccTab.add(eccPrint, BorderLayout.LINE_END);
+	    
+	    JLabel label1 = new JLabel();
+	    label1.setText("Select Desired Key Size");
+	    eccSettings.add(label1);
+	    
+	    ecc160 = new JRadioButton("160-bit Key Size          ");
+	    ecc160.setSelected(true);
+	    ecc224 = new JRadioButton("224-bit Key Size          ");
+	    ecc256 = new JRadioButton("256-bit Key Size          ");
+	       
+	    ButtonGroup eccKeySize = new ButtonGroup();
+	    eccKeySize.add(ecc160);
+	    eccKeySize.add(ecc224);
+	    eccKeySize.add(ecc256);
+	       
+	    eccSettings.add(ecc160);
+	    eccSettings.add(ecc224);
+	    eccSettings.add(ecc256);
+	    
+	    eccSettings.add(Box.createRigidArea(new Dimension(0,10)));//Create spacing for formatting
+	    
+	    JLabel plaintextLbl = new JLabel();
+	    plaintextLbl.setText("Provide a Sample Plaintext:");
+	    eccSettings.add(plaintextLbl);
+	    
+	    eccPlaintextBox = new JTextArea(1, 30);
+	    eccPlaintextBox.setLineWrap(true);
+	    JScrollPane scrollPlaintext = new JScrollPane(eccPlaintextBox);
+	    eccSettings.add(scrollPlaintext);
+	    eccSettings.add(Box.createRigidArea(new Dimension(0,10)));//Create spacing for formatting
+	    
+	    JLabel publicKeyLbl = new JLabel();
+	    publicKeyLbl.setText("Your generated public key is:");
+	    eccSettings.add(publicKeyLbl);
+	    
+	    eccPublicKeyBox = new JTextArea(1, 30);
+	    eccPublicKeyBox.setLineWrap(true);
+	    eccPublicKeyBox.setEditable(false);
+	    eccPublicKeyBox.setBackground(Color.LIGHT_GRAY);
+	    JScrollPane scrollPublicKey = new JScrollPane(eccPublicKeyBox);
+	    eccSettings.add(scrollPublicKey);
+	    eccSettings.add(Box.createRigidArea(new Dimension(0,10)));//Create spacing for formatting
+	    
+	    eccSettings.add(Box.createRigidArea(new Dimension(0,10)));//Create spacing for formatting
+	    
+	    JLabel ciphertextLbl = new JLabel();
+	    ciphertextLbl.setText("Your Ciphertext is:");
+	    eccSettings.add(ciphertextLbl);
+	    
+	    eccCiphertextBox = new JTextArea(1, 30);
+	    eccCiphertextBox.setLineWrap(true);
+	    eccCiphertextBox.setEditable(false);
+	    eccCiphertextBox.setBackground(Color.LIGHT_GRAY);
+	    JScrollPane scrollCiphertext = new JScrollPane(eccCiphertextBox);
+	    eccSettings.add(scrollCiphertext);
+	    eccSettings.add(Box.createRigidArea(new Dimension(0,10)));//Create spacing for formatting
+	    
+	    JButton eccEncrypt = new JButton("Calculate Encryption");
+	    JButton eccDecrypt = new JButton("Calculate Decryption");
+	    eccSettings.add(eccEncrypt);
+	    eccSettings.add(Box.createRigidArea(new Dimension(0,10)));//Create spacing for formatting
+	    eccSettings.add(eccDecrypt);
+	    
+	    ECCButtonHandler handler = new ECCButtonHandler();
+	    eccEncrypt.addActionListener(handler);
+	    eccDecrypt.addActionListener(handler);
+	    
+	    eccResults = new JTextArea("Results will appear here", 35, 40);
+	    eccResults.setLineWrap(true);
+	    eccResults.setBackground(Color.BLACK);
+	    eccResults.setForeground(Color.WHITE);
+	    eccResults.setEditable(false);
+	    
+	    eccResults.setCaretPosition(eccResults.getDocument().getLength());
+	    
+	    JScrollPane scrollResults = new JScrollPane(eccResults);
+	    eccPrint.add(scrollResults);
+		
+		mainTabbedPane.addTab("Elliptic Curve", eccTab);
+	}
+	
 	class AESButtonHandler implements ActionListener
 	{
 		private SecretKey aesKey;
@@ -343,8 +456,6 @@ public class SelectionGUI extends JFrame{
 		byte[] encryptedTextByte;
 		private Cipher cipher;
 		byte[] iv;
-		private AESCBC aescbc;
-		private AESECB aesecb;
 		
         public void actionPerformed(ActionEvent e)
         {
@@ -553,8 +664,6 @@ public class SelectionGUI extends JFrame{
 		private Cipher cipher;
 		byte[] iv;
 		private String desType;
-		private DESCBC descbc;
-		private DESECB desecb;
 		
         public void actionPerformed(ActionEvent e)
         {
@@ -768,7 +877,6 @@ public class SelectionGUI extends JFrame{
 		private String encryptedText;
 		byte[] encryptedTextByte;
 		private Cipher cipher;
-		private RSA rsa;
 		
         public void actionPerformed(ActionEvent e)
         {
@@ -872,6 +980,178 @@ public class SelectionGUI extends JFrame{
         	rsaResults.append("\n\nTotal RSA Run Time: " + rsa.getTotalSecs() + " milliseconds.");
         	rsaResults.append("\n********************************************************************************");
         }
+	}
+	
+	class ECCButtonHandler implements ActionListener
+	{
+		private PublicKey publicKey;
+		private PrivateKey privateKey;
+		private int keySize;
+		private String encryptedText;
+		byte[] encryptedTextByte;
+		private Cipher cipher;
+		
+        public void actionPerformed(ActionEvent e)
+        {
+        	if(ecc160.isSelected())
+    		{
+    			keySize = 160;
+    		}
+    		else if(ecc224.isSelected())
+    		{
+    			keySize = 224;
+    		}
+    		else if(ecc256.isSelected())
+    		{
+    			keySize = 256;
+    		}
+        	
+        	JButton sourceButton = (JButton)e.getSource();
+        	if(sourceButton.getText().equals("Calculate Encryption"))
+        	{
+        		try {
+					encryptECC();
+				} catch (InvalidKeyException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchAlgorithmException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchProviderException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchPaddingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalBlockSizeException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (BadPaddingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvalidAlgorithmParameterException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        	}
+        	else if(sourceButton.getText().equals("Calculate Decryption"))
+        	{
+        		try {
+					decryptECC();
+				} catch (InvalidKeyException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalBlockSizeException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (BadPaddingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchAlgorithmException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchProviderException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchPaddingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        	}
+        }
+        
+        private void encryptECC() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException
+        {
+        	String eccPlaintext = eccPlaintextBox.getText();
+        	ecc = new ECC(eccPlaintext, keySize);
+        	
+        	eccResults.append("\n\n---------- Generating a " + keySize + "-bit Key ----------");
+        	eccResults.append("\n\nTime took to generate key of size " 
+    				+ keySize + " bits: "
+    				+ rsa.getKeyGenSecs() + " milliseconds.");
+        	eccResults.append("\n\n" + ecc.getPublicKey());
+        	
+        	eccPublicKeyBox.setText("" + ecc.getPublicKey());
+        	
+        	if(eccPlaintextBox.getText().equals(""))
+    		{
+    		    eccResults.append("\n\nPlaintext field is empty!");
+    		}
+        	else
+    		{
+    			ecc.encrypt();
+    			
+    			eccResults.append("\n\nPlaintext is: " + eccPlaintext);    			
+    			eccResults.append("\n\nCiphertext is: " + ecc.getEncryptedText());
+    			eccResults.append("\n\nECC Encryption Time: " + ecc.getEncryptSecs() + " milliseconds.");
+    			//rsaResults.append("\n********************************************************************************");
+    			
+    			eccCiphertextBox.setText(ecc.getEncryptedText());
+    			System.out.println("Ciphertext is: " + ecc.getEncryptedText());
+    		} 
+        }
+        
+        private void decryptECC() throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException
+        {
+        	ecc.decrypt();
+        	
+        	eccResults.append("\n\nDecrypted Text is: " + ecc.getDecryptedText());
+        	eccResults.append("\n\nECC Decryption Time: " + ecc.getDecryptSecs() + " milliseconds.");
+        	eccResults.append("\n\nTotal ECC Run Time: " + ecc.getTotalSecs() + " milliseconds.");
+        	eccResults.append("\n********************************************************************************");
+        }
+	}
+	
+	public void initInstatiation()
+	{
+		try {
+			aesecb = new AESECB("init", 128);
+			aesecb.encrypt();
+			aesecb.decrypt();
+			
+			aescbc = new AESCBC("init", 128);
+			aescbc.encrypt();
+			aescbc.decrypt();
+			
+			desecb = new DESECB("init", "DES");
+			desecb.encrypt();
+			desecb.decrypt();
+			
+			descbc = new DESCBC("init", "DES");
+			descbc.encrypt();
+			descbc.decrypt();
+			
+			desecb = new DESECB("init", "DESede");
+			desecb.encrypt();
+			desecb.decrypt();
+			
+			rsa = new RSA("init", 1024);
+			rsa.encrypt();
+			rsa.decrypt();
+			
+			ecc = new ECC("init", 160);
+			ecc.encrypt();
+			ecc.decrypt();
+			
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidAlgorithmParameterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static void main (String []args)
